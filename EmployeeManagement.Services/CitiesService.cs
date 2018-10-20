@@ -53,7 +53,7 @@ namespace EmployeeManagement.Services
                 response.validations = ValidateCity(model);
                 if (response.validations.isValid)
                 {
-                    UnitOfWork.Repository<City>().Update(model.toEntity());
+                    UnitOfWork.Repository<City>().Update(model.toEntity(City));
                     UnitOfWork.SaveChanges();
                     response.Status = Enums.ServiceResponseStatus.Success;
                 }
@@ -101,7 +101,7 @@ namespace EmployeeManagement.Services
         {
             try
             {
-                return UnitOfWork.Repository<City>().GetSingle(x => x.Id == Id).toDTO();
+                return UnitOfWork.Repository<City>().GetSingle(x => x.Id == Id,x=>x.Country).toDTO();
             }
             finally
             {
@@ -109,11 +109,23 @@ namespace EmployeeManagement.Services
             }
         }
 
-        public List<CityDto> GetAllCitys()
+        public List<CityDto> GetAllCities()
         {
             try
             {
-                return UnitOfWork.Repository<City>().GetAll().toDTO();
+                return UnitOfWork.Repository<City>().GetAll(null,x=>x.Country).toDTO();
+            }
+            finally
+            {
+                UnitOfWork.Dispose();
+            }
+        }
+
+        public List<CityDto> GetCities(int CountryId)
+        {
+            try
+            {
+                return UnitOfWork.Repository<City>().GetAll(x=>x.CountryId == CountryId).toDTO();
             }
             finally
             {
@@ -128,6 +140,19 @@ namespace EmployeeManagement.Services
             if (string.IsNullOrWhiteSpace(model.Name))
             {
                 validations.AddError("Name", "Name Field is required");
+            }
+            else if (UnitOfWork.Repository<City>().Any(x=>x.Id !=model.Id && x.Name.ToLower().Trim() == model.Name.ToLower().Trim() && x.CountryId == model.Country))
+            {
+                validations.AddError("", "City already Exist");
+            }
+
+            if (model.Country == 0)
+            {
+                validations.AddError("Country", "Country is required");
+            }
+            else if (!UnitOfWork.Repository<City>().Any(x => x.Id == model.Country))
+            {
+                validations.AddError("Country", "Country doesn't Exist");
             }
             return validations;
         }

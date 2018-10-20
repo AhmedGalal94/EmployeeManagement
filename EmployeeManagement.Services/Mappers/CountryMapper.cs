@@ -23,15 +23,20 @@ namespace EmployeeManagement.Services.Mappers
             return null;
         }
 
-        public static Country toEntity(this CountryDto model)
+        public static Country toEntity(this CountryDto model, Country entity = null)
         {
             if (model != null)
             {
+                if(entity == null)
                 return new Country
                 {
                     Id = model.Id,
                     Name = model.Name
                 };
+
+                entity.Id = model.Id;
+                entity.Name = model.Name;
+                return entity;
             }
             return null;
         }

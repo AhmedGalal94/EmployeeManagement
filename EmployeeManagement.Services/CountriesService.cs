@@ -54,7 +54,7 @@ namespace EmployeeManagement.Services
                 response.validations = ValidateCountry(model);
                 if (response.validations.isValid)
                 {
-                    UnitOfWork.Repository<Country>().Update(model.toEntity());
+                    UnitOfWork.Repository<Country>().Update(model.toEntity(Country));
                     UnitOfWork.SaveChanges();
                     response.Status = Enums.ServiceResponseStatus.Success;
                 }
@@ -110,7 +110,7 @@ namespace EmployeeManagement.Services
             }
         }
 
-        public List<CountryDto> GetAllCountrys()
+        public List<CountryDto> GetAllCountries()
         {
             try
             {
@@ -129,6 +129,10 @@ namespace EmployeeManagement.Services
             if (string.IsNullOrWhiteSpace(model.Name))
             {
                 validations.AddError("Name", "Name Field is required");
+            }
+            else if (UnitOfWork.Repository<Country>().Any(x => x.Id != model.Id && x.Name.ToLower().Trim() == model.Name.ToLower().Trim()))
+            {
+                validations.AddError("", "Country already Exist");
             }
             return validations;
         }

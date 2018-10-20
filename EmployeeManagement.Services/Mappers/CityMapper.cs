@@ -25,16 +25,22 @@ namespace EmployeeManagement.Services.Mappers
             return null;
         }
 
-        public static City toEntity(this CityDto model)
+        public static City toEntity(this CityDto model, City entity = null)
         {
             if (model != null)
             {
+                if(entity == null)
                 return new City
                 {
                     Id = model.Id,
                     Name = model.Name,
                     CountryId = model.Country
                 };
+
+                entity.Id = model.Id;
+                entity.Name = model.Name;
+                entity.CountryId = model.Country;
+                return entity;
             }
             return null;
         }

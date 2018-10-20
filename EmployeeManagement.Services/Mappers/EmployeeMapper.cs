@@ -19,22 +19,36 @@ namespace EmployeeManagement.Services.Mappers
                     Id = entity.Id,
                     Name = entity.Name,
                     City = entity.CityId,
+                    Country = entity.City!=null? entity.City.CountryId:0,
+                    Email = entity.Email,
+                    Salary = entity.Salary,
                     CityDto = entity.City.toDTO()
                 };
             }
             return null;
         }
 
-        public static Employee toEntity(this EmployeeDto model)
+        public static Employee toEntity(this EmployeeDto model,Employee entity = null)
         {
             if (model != null)
             {
+                if(entity == null)
                 return new Employee
                 {
                     Id = model.Id,
                     Name = model.Name,
-                    CityId = model.City
+                    CityId = model.City,
+                    Email = model.Email,
+                    Salary = model.Salary
                 };
+
+                entity.Id = model.Id;
+                entity.Name = model.Name;
+                entity.CityId = model.City;
+                entity.Email = model.Email;
+                entity.Salary = model.Salary;
+                return entity;
+
             }
             return null;
         }

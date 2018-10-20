@@ -57,7 +57,7 @@ namespace EmployeeManagement.Services
                 response.validations = ValidateEmployee(model);
                 if (response.validations.isValid)
                 {
-                    UnitOfWork.Repository<Employee>().Update(model.toEntity());
+                    UnitOfWork.Repository<Employee>().Update(model.toEntity(employee));
                     UnitOfWork.SaveChanges();
 
                     response.Status = Enums.ServiceResponseStatus.Success;
@@ -106,7 +106,7 @@ namespace EmployeeManagement.Services
         {
             try
             {
-                return UnitOfWork.Repository<Employee>().GetSingle(x => x.Id == Id).toDTO();
+                return UnitOfWork.Repository<Employee>().GetSingle(x => x.Id == Id, x => x.City, x => x.City.Country).toDTO();
             }
             finally
             {
@@ -118,7 +118,7 @@ namespace EmployeeManagement.Services
         {
             try
             {
-                return UnitOfWork.Repository<Employee>().GetAll().toDTO();
+                return UnitOfWork.Repository<Employee>().GetAll(null,x=>x.City,x=>x.City.Country).toDTO();
             }
             finally
             {
@@ -139,27 +139,37 @@ namespace EmployeeManagement.Services
                 validations.AddError("Salary", "invaild Salary");
             }
 
+            if (model.Country == 0)
+            {
+                validations.AddError("Country", "Country is required");
+            }
+            else if (!UnitOfWork.Repository<Country>().Any(x => x.Id == model.Country))
+            {
+                validations.AddError("Country", "Country doesn't Exist");
+            }
+
             if (model.City == 0)
             {
                 validations.AddError("City", "City is required");
             }
-            else if (UnitOfWork.Repository<City>().Any(x => x.Id == model.City))
+            else if (!UnitOfWork.Repository<City>().Any(x => x.Id == model.City))
             {
                 validations.AddError("City", "City doesn't Exist");
             }
 
 
+
             if (string.IsNullOrWhiteSpace(model.Email))
             {
-                validations.AddError("City", "Email Field is required");
+                validations.AddError("Email", "Email Field is required");
             }
-            if (new EmailAddressAttribute().IsValid(model.Email))
+            if (!(new EmailAddressAttribute().IsValid(model.Email)))
             {
-                validations.AddError("City", "Invaild Email");
+                validations.AddError("Email", "Invaild Email");
             }
-            else if (UnitOfWork.Repository<Employee>().Any(x => x.Id != model.Id && x.Email == model.Email))
+            else if (UnitOfWork.Repository<Employee>().Any(x => x.Id != model.Id && x.Email.ToLower() == model.Email.ToLower()))
             {
-                validations.AddError("City", "This Email  already Exist");
+                validations.AddError("Email", "This Email already Exist");
             }
             return validations;
         }
